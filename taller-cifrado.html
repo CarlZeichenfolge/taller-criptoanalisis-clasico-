@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criptoanálisis Clásico Universidad El Bosque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12181A;
+    --panel:#1B2326;
+    --panel-raised:#212B2E;
+    --hairline:#33403f;
+    --paper:#E8E4D9;
+    --paper-dim:#9CA6A2;
+    --brass:#C9A227;
+    --brass-dim:#8a7220;
+    --rust:#B5533C;
+    --moss:#6B9080;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Sans',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 120px;}
+
+  header{margin-bottom:56px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--brass);
+    letter-spacing:.02em;
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Spectral',serif;
+    font-weight:500;
+    font-size:clamp(32px,5vw,46px);
+    line-height:1.12;
+    margin:0 0 16px;
+    color:var(--paper);
+  }
+  h1 em{font-style:italic;color:var(--brass);}
+  .lede{
+    font-size:16px;
+    color:var(--paper-dim);
+    max-width:60ch;
+    margin:0;
+  }
+
+  .reto{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:3px;
+    margin-bottom:28px;
+    overflow:hidden;
+  }
+  .reto-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    padding:22px 26px;
+    border-bottom:1px solid var(--hairline);
+    background:linear-gradient(180deg, var(--panel-raised), var(--panel));
+  }
+  .reto-num{
+    font-family:'Spectral',serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--brass);
+    flex-shrink:0;
+  }
+  .reto-head h2{
+    font-family:'Spectral',serif;
+    font-weight:500;
+    font-size:22px;
+    margin:0;
+    color:var(--paper);
+  }
+  .reto-head .metodo{
+    margin-left:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--paper-dim);
+    text-align:right;
+  }
+
+  .reto-body{padding:24px 26px 26px;}
+
+  label{
+    display:block;
+    font-size:12.5px;
+    color:var(--paper-dim);
+    margin-bottom:7px;
+  }
+  textarea{
+    width:100%;
+    min-height:96px;
+    background:#0E1315;
+    border:1px solid var(--hairline);
+    border-radius:3px;
+    color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    line-height:1.6;
+    padding:12px 14px;
+    resize:vertical;
+    word-break:break-all;
+  }
+  textarea:focus{outline:none;border-color:var(--brass-dim);}
+
+  .row{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;}
+
+  button{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding:10px 18px;
+    border-radius:3px;
+    border:1px solid var(--hairline);
+    background:transparent;
+    color:var(--paper);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  button:hover{border-color:var(--paper-dim);}
+  button.primary{
+    background:var(--brass);
+    color:#1a1305;
+    border-color:var(--brass);
+  }
+  button.primary:hover{background:#dbb333;}
+
+  .resultado{margin-top:22px;display:none;}
+  .resultado.visible{display:block;}
+
+  .metric-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .metric{
+    flex:1;
+    min-width:160px;
+    background:#0E1315;
+    border:1px solid var(--hairline);
+    border-radius:3px;
+    padding:14px 16px;
+  }
+  .metric .label{font-size:11px;color:var(--paper-dim);margin-bottom:5px;}
+  .metric .value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:20px;
+    color:var(--brass);
+  }
+  .metric .value.veredicto{font-size:14px;color:var(--moss);}
+
+  .subhead{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--paper-dim);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin:20px 0 10px;
+  }
+
+  .freq-bars{display:flex;align-items:flex-end;gap:2px;height:100px;margin-bottom:6px;}
+  .freq-bar{flex:1;background:var(--brass-dim);border-radius:1px 1px 0 0;position:relative;min-width:3px;}
+  .freq-bar.top{background:var(--brass);}
+  .freq-labels{display:flex;gap:2px;}
+  .freq-labels span{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--paper-dim);min-width:3px;}
+
+  .candidatos{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    max-height:180px;
+    overflow-y:auto;
+    border:1px solid var(--hairline);
+    border-radius:3px;
+  }
+  .candidato{
+    display:flex;
+    gap:12px;
+    padding:8px 12px;
+    border-bottom:1px solid var(--hairline);
+    cursor:pointer;
+    color:var(--paper-dim);
+  }
+  .candidato:last-child{border-bottom:none;}
+  .candidato:hover{background:#0E1315;}
+  .candidato.elegido{color:var(--brass);background:#0E1315;}
+  .candidato .b{width:36px;flex-shrink:0;white-space:nowrap;}
+  .candidato .b.ancho{width:78px;}
+  .candidato .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .salida-box{
+    background:#0E1315;
+    border:1px solid var(--moss);
+    border-radius:3px;
+    padding:16px;
+    margin-top:6px;
+  }
+  .salida-box .clave{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--moss);
+    font-size:13px;
+    margin-bottom:10px;
+  }
+  .salida-box .clave b{color:var(--paper);letter-spacing:.05em;}
+  .salida-texto{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--paper);
+    word-break:break-word;
+  }
+
+  .aviso{
+    font-size:12.5px;
+    color:var(--rust);
+    background:rgba(181,83,60,.1);
+    border:1px solid rgba(181,83,60,.35);
+    border-radius:3px;
+    padding:10px 13px;
+    margin-top:14px;
+  }
+
+  footer{
+    margin-top:48px;
+    padding-top:24px;
+    border-top:1px solid var(--hairline);
+    font-size:12px;
+    color:var(--paper-dim);
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:4px;}
+
+  @media (max-width:600px){
+    .reto-head{flex-wrap:wrap;}
+    .reto-head .metodo{margin-left:0;text-align:left;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">SEGURIDAD DE LA INFORMACIÓN · UNIVERSIDAD EL BOSQUE · 2026-II</div>
+    <h1>Banco de trabajo del <em>criptoanalista</em></h1>
+    <p class="lede">Pega cada criptograma, calcula su índice de coincidencia y deja que el ataque correspondiente como fuerza bruta, ecuaciones o Kasiski, encuentre la clave por ti.</p>
+  </header>
+
+  <!-- ============ RETO 1: CÉSAR ============ -->
+  <section class="reto" id="reto-cesar">
+    <div class="reto-head">
+      <span class="reto-num">Reto I</span>
+      <h2>Cifrado César</h2>
+      <span class="metodo">ATAQUE · FUERZA BRUTA</span>
+    </div>
+    <div class="reto-body">
+      <label for="in-cesar">Criptograma (A–Z, sin espacios)</label>
+      <textarea id="in-cesar" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="primary" onclick="analizarCesar()">Analizar y descifrar</button>
+        <button onclick="cargarEjemplo('cesar')">Cargar ejemplo del taller</button>
+      </div>
+
+      <div class="resultado" id="res-cesar">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="label">Índice de coincidencia</div>
+            <div class="value" id="ic-cesar">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Diagnóstico</div>
+            <div class="value veredicto" id="veredicto-cesar">—</div>
+          </div>
+        </div>
+
+        <div class="subhead">Frecuencias del criptograma</div>
+        <div class="freq-bars" id="bars-cesar"></div>
+        <div class="freq-labels" id="labels-cesar"></div>
+
+        <div class="subhead">Fuerza bruta — 27 desplazamientos (ordenados por verosimilitud)</div>
+        <div class="candidatos" id="candidatos-cesar"></div>
+
+        <div class="subhead">Resultado</div>
+        <div class="salida-box">
+          <div class="clave">Clave detectada: <b id="clave-cesar">—</b></div>
+          <div class="salida-texto" id="salida-cesar"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RETO 2: AFÍN ============ -->
+  <section class="reto" id="reto-afin">
+    <div class="reto-head">
+      <span class="reto-num">Reto II</span>
+      <h2>Cifrado Afín</h2>
+      <span class="metodo">ATAQUE · ECUACIONES / χ²</span>
+    </div>
+    <div class="reto-body">
+      <label for="in-afin">Criptograma (A–Z, sin espacios)</label>
+      <textarea id="in-afin" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="primary" onclick="analizarAfin()">Analizar y descifrar</button>
+        <button onclick="cargarEjemplo('afin')">Cargar ejemplo del taller</button>
+      </div>
+
+      <div class="resultado" id="res-afin">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="label">Índice de coincidencia</div>
+            <div class="value" id="ic-afin">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Diagnóstico</div>
+            <div class="value veredicto" id="veredicto-afin">—</div>
+          </div>
+        </div>
+
+        <div class="subhead">Frecuencias del criptograma</div>
+        <div class="freq-bars" id="bars-afin"></div>
+        <div class="freq-labels" id="labels-afin"></div>
+
+        <div class="subhead">Búsqueda de (a, b) — se probaron todas las combinaciones válidas (mcd(a,27)=1)</div>
+        <div class="candidatos" id="candidatos-afin"></div>
+
+        <div class="subhead">Resultado</div>
+        <div class="salida-box">
+          <div class="clave">Clave detectada: <b id="clave-afin">—</b></div>
+          <div class="salida-texto" id="salida-afin"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RETO 3: VIGENÈRE ============ -->
+  <section class="reto" id="reto-vigenere">
+    <div class="reto-head">
+      <span class="reto-num">Reto III</span>
+      <h2>Cifrado de Vigenère</h2>
+      <span class="metodo">ATAQUE · KASISKI + χ²</span>
+    </div>
+    <div class="reto-body">
+      <label for="in-vig">Criptograma (A–Z, sin espacios)</label>
+      <textarea id="in-vig" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="primary" onclick="analizarVigenere()">Analizar y descifrar</button>
+        <button onclick="cargarEjemplo('vigenere')">Cargar ejemplo del taller</button>
+      </div>
+
+      <div class="resultado" id="res-vig">
+        <div class="metric-row">
+          <div class="metric">
+            <div class="label">Índice de coincidencia</div>
+            <div class="value" id="ic-vig">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Diagnóstico</div>
+            <div class="value veredicto" id="veredicto-vig">—</div>
+          </div>
+        </div>
+
+        <div class="subhead">Frecuencias del criptograma</div>
+        <div class="freq-bars" id="bars-vig"></div>
+        <div class="freq-labels" id="labels-vig"></div>
+
+        <div class="subhead">Kasiski — longitudes de clave candidatas (elige otra si lo prefieres)</div>
+        <div class="candidatos" id="candidatos-vig"></div>
+
+        <div class="subhead">Resultado</div>
+        <div class="salida-box">
+          <div class="clave">Longitud de clave: <b id="long-vig">—</b> · Clave detectada: <b id="clave-vig">—</b></div>
+          <div class="salida-texto" id="salida-vig"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Herramienta de criptoanálisis clásico construida para el taller de Seguridad de la Información, 2026-II.
+  </footer>
+
+</div>
+
+<script>
+/* ============== NÚCLEO CRIPTOGRÁFICO ============== */
+const ALFABETO = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+const N = ALFABETO.length;
+const posOf = {};
+for (let i = 0; i < N; i++) posOf[ALFABETO[i]] = i;
+
+const FREC_ES = {A:12.53,B:1.42,C:4.68,D:5.86,E:13.68,F:0.69,G:1.01,H:0.70,I:6.25,J:0.44,K:0.02,L:4.97,M:3.15,N:6.71,Ñ:0.31,O:8.68,P:2.51,Q:0.88,R:6.87,S:7.98,T:4.63,U:3.93,V:0.90,W:0.01,X:0.22,Y:0.90,Z:0.52};
+
+function normalizar(texto){
+  texto = texto.toUpperCase();
+  const rep = {"Á":"A","É":"E","Í":"I","Ó":"O","Ú":"U","Ü":"U"};
+  texto = texto.split("").map(c => rep[c] || c).join("");
+  return texto.split("").filter(c => posOf.hasOwnProperty(c)).join("");
+}
+function indiceCoincidencia(texto){
+  const n = texto.length;
+  if (n <= 1) return 0;
+  const frec = {};
+  for (const c of texto) frec[c] = (frec[c]||0)+1;
+  let suma = 0;
+  for (const f of Object.values(frec)) suma += f*(f-1);
+  return suma/(n*(n-1));
+}
+function conteoFrecuencias(texto){
+  const n = texto.length;
+  const frec = {};
+  for (const c of texto) frec[c] = (frec[c]||0)+1;
+  const pct = {};
+  for (const [c,f] of Object.entries(frec)) pct[c] = (f/n)*100;
+  return Object.fromEntries(Object.entries(pct).sort((a,b)=>b[1]-a[1]));
+}
+function chiCuadrado(texto){
+  const n = texto.length;
+  if (n === 0) return Infinity;
+  const obs = conteoFrecuencias(texto);
+  let chi2 = 0;
+  for (const letra of ALFABETO){
+    const esperado = FREC_ES[letra] || 0.01;
+    const observado = obs[letra] || 0;
+    chi2 += ((observado-esperado)**2)/esperado;
+  }
+  return chi2;
+}
+function gcd(a,b){ return b===0?a:gcd(b,a%b); }
+function inversoModular(a,n=N){
+  for (let x=1;x<n;x++) if ((a*x)%n===1) return x;
+  return null;
+}
+// César
+function cifrarCesar(t,b){ return t.split("").map(c=>ALFABETO[(posOf[c]+b)%N]).join(""); }
+function descifrarCesar(t,b){ return t.split("").map(c=>ALFABETO[((posOf[c]-b)%N+N)%N]).join(""); }
+function fuerzaBrutaCesar(cript){
+  const todos = [];
+  for (let b=0;b<N;b++){
+    const txt = descifrarCesar(cript,b);
+    todos.push({b, texto:txt, chi2: chiCuadrado(txt)});
+  }
+  todos.sort((x,y)=>x.chi2-y.chi2);
+  return todos;
+}
+// Afín
+function descifrarAfin(t,a,b){
+  const aInv = inversoModular(a);
+  return t.split("").map(c=>ALFABETO[(aInv*(((posOf[c]-b)%N+N)%N))%N]).join("");
+}
+function fuerzaBrutaAfin(cript){
+  const todos = [];
+  for (let a=1;a<N;a++){
+    if (gcd(a,N)!==1) continue;
+    for (let b=0;b<N;b++){
+      const txt = descifrarAfin(cript,a,b);
+      todos.push({a,b,texto:txt,chi2:chiCuadrado(txt)});
+    }
+  }
+  todos.sort((x,y)=>x.chi2-y.chi2);
+  return todos;
+}
+// Vigenère
+function descifrarVigenere(t,clave){
+  clave = clave.toUpperCase();
+  return t.split("").map((c,i)=>ALFABETO[((posOf[c]-posOf[clave[i%clave.length]])%N+N)%N]).join("");
+}
+function dividirColumnas(t,L){
+  const cols = Array.from({length:L},()=> "");
+  for (let i=0;i<t.length;i++) cols[i%L]+=t[i];
+  return cols;
+}
+function buscarSecuenciasRepetidas(t,long=3){
+  const posiciones = {};
+  for (let i=0;i<=t.length-long;i++){
+    const sub = t.slice(i,i+long);
+    (posiciones[sub] = posiciones[sub]||[]).push(i);
+  }
+  const dist = [];
+  for (const lista of Object.values(posiciones)){
+    if (lista.length>1) for (let i=1;i<lista.length;i++) dist.push(lista[i]-lista[0]);
+  }
+  return dist;
+}
+function kasiskiCandidatos(t,maxL=20){
+  const dist = buscarSecuenciasRepetidas(t,3);
+  const votos = {};
+  for (const d of dist) for (let L=2;L<=maxL;L++) if (d%L===0) votos[L]=(votos[L]||0)+1;
+  return Object.entries(votos).map(([L,v])=>({L:Number(L),votos:v})).sort((a,b)=>b.votos-a.votos);
+}
+function icPromedioColumnas(t,L){
+  const cols = dividirColumnas(t,L);
+  const ics = cols.filter(c=>c.length>1).map(indiceCoincidencia);
+  return ics.reduce((a,b)=>a+b,0)/ics.length;
+}
+function romperColumnaPorChi2(col){
+  let mejorB=0, mejorChi2=Infinity;
+  for (let b=0;b<N;b++){
+    const chi2 = chiCuadrado(descifrarCesar(col,b));
+    if (chi2<mejorChi2){mejorChi2=chi2; mejorB=b;}
+  }
+  return mejorB;
+}
+function romperVigenere(cript,L){
+  const cols = dividirColumnas(cript,L);
+  return cols.map(c=>ALFABETO[romperColumnaPorChi2(c)]).join("");
+}
+
+/* ============== EJEMPLOS DEL TALLER (validación) ============== */
+const EJEMPLOS = {
+  cesar: "MFGPFXTGWJPFMNXYTWNFIJPFHWNUYTLWFKNFIJXIJPFFRYNLZJIFIQJRHNTRFRITVZJPFRJHJXNIFIIJTHZPYFWQJRXFÑJXMFJCNXYNITXNJQUWJUFWFUWTYJLJWXJHWJYTXQNPNYFWJXDUTPNYNHTX",
+  afin: "ASGITQHAIHRHITUTUVAFPAQEARQTHUXQBNBIHUIAZPHUQBNBIHAXIHHUBRIHUNHUQBNERAUARAITVTBNHAUGHWBIGAPNTZTARVBPBNGAPQTFPHVBUNBRBHIFHMAZTQBUQBRPAIHZTJHFHQTITVHV",
+  vigenere: "PYTGECCIXUNEDOJQNYÑMSGBCOJNSNFBQGOSMZAMSSMPHQNDMRMBVXUFQÑFFXOBMILKBVWWBPÑCBQPJFOOOSWBXFONNFKHHEESOFVEUNYZXJEXASEOCBWNFVWBXFONNQVUGFVNNDSYKVXNXPVNNFOQWUVBGFGNHJGNN"
+};
+function cargarEjemplo(tipo){
+  if (tipo==='cesar') document.getElementById('in-cesar').value = EJEMPLOS.cesar;
+  if (tipo==='afin') document.getElementById('in-afin').value = EJEMPLOS.afin;
+  if (tipo==='vigenere') document.getElementById('in-vig').value = EJEMPLOS.vigenere;
+}
+
+/* ============== RENDER HELPERS ============== */
+function renderVeredicto(ic){
+  return ic > 0.06 ? "Monoalfabético" : "Polialfabético";
+}
+function renderBarras(texto, barsId, labelsId){
+  const frecs = conteoFrecuencias(texto);
+  const entradas = Object.entries(frecs);
+  const max = Math.max(...entradas.map(([,v])=>v), 1);
+  const barsEl = document.getElementById(barsId);
+  const labelsEl = document.getElementById(labelsId);
+  barsEl.innerHTML = "";
+  labelsEl.innerHTML = "";
+  entradas.forEach(([letra,val],i)=>{
+    const bar = document.createElement('div');
+    bar.className = 'freq-bar' + (i<2 ? ' top' : '');
+    bar.style.height = Math.max((val/max)*100, 2) + '%';
+    bar.title = letra + ': ' + val.toFixed(2) + '%';
+    barsEl.appendChild(bar);
+    const lab = document.createElement('span');
+    lab.textContent = letra;
+    labelsEl.appendChild(lab);
+  });
+}
+
+/* ============== RETO 1: CÉSAR ============== */
+function analizarCesar(){
+  const raw = document.getElementById('in-cesar').value;
+  const cript = normalizar(raw);
+  if (cript.length < 10) { alert('Pega un criptograma más largo.'); return; }
+
+  document.getElementById('ic-cesar').textContent = indiceCoincidencia(cript).toFixed(4);
+  document.getElementById('veredicto-cesar').textContent = renderVeredicto(indiceCoincidencia(cript));
+  renderBarras(cript, 'bars-cesar', 'labels-cesar');
+
+  const todos = fuerzaBrutaCesar(cript);
+  const cont = document.getElementById('candidatos-cesar');
+  cont.innerHTML = '';
+  todos.slice(0,10).forEach((r,i)=>{
+    const div = document.createElement('div');
+    div.className = 'candidato' + (i===0 ? ' elegido' : '');
+    div.innerHTML = `<span class="b">b=${r.b}</span><span class="txt">${r.texto.slice(0,70)}</span>`;
+    div.onclick = () => seleccionarCesar(r.b, cript);
+    cont.appendChild(div);
+  });
+  seleccionarCesar(todos[0].b, cript);
+  document.getElementById('res-cesar').classList.add('visible');
+}
+function seleccionarCesar(b, cript){
+  document.getElementById('clave-cesar').textContent = 'b = ' + b;
+  document.getElementById('salida-cesar').textContent = descifrarCesar(cript, b);
+  document.querySelectorAll('#candidatos-cesar .candidato').forEach(el=>el.classList.remove('elegido'));
+  const idx = Array.from(document.querySelectorAll('#candidatos-cesar .candidato')).findIndex(el=>el.querySelector('.b').textContent===('b='+b));
+  if (idx>=0) document.querySelectorAll('#candidatos-cesar .candidato')[idx].classList.add('elegido');
+}
+
+/* ============== RETO 2: AFÍN ============== */
+function analizarAfin(){
+  const raw = document.getElementById('in-afin').value;
+  const cript = normalizar(raw);
+  if (cript.length < 10) { alert('Pega un criptograma más largo.'); return; }
+
+  document.getElementById('ic-afin').textContent = indiceCoincidencia(cript).toFixed(4);
+  document.getElementById('veredicto-afin').textContent = renderVeredicto(indiceCoincidencia(cript));
+  renderBarras(cript, 'bars-afin', 'labels-afin');
+
+  const todos = fuerzaBrutaAfin(cript);
+  const cont = document.getElementById('candidatos-afin');
+  cont.innerHTML = '';
+  todos.slice(0,10).forEach((r,i)=>{
+    const div = document.createElement('div');
+    div.className = 'candidato' + (i===0 ? ' elegido' : '');
+    div.innerHTML = `<span class="b ancho">a=${r.a}, b=${r.b}</span><span class="txt">${r.texto.slice(0,55)}</span>`;
+    div.onclick = () => seleccionarAfin(r.a, r.b, cript);
+    cont.appendChild(div);
+  });
+  seleccionarAfin(todos[0].a, todos[0].b, cript);
+  document.getElementById('res-afin').classList.add('visible');
+}
+function seleccionarAfin(a,b,cript){
+  document.getElementById('clave-afin').textContent = `a = ${a}, b = ${b}`;
+  document.getElementById('salida-afin').textContent = descifrarAfin(cript, a, b);
+}
+
+/* ============== RETO 3: VIGENÈRE ============== */
+function analizarVigenere(){
+  const raw = document.getElementById('in-vig').value;
+  const cript = normalizar(raw);
+  if (cript.length < 20) { alert('Pega un criptograma más largo.'); return; }
+
+  const ic = indiceCoincidencia(cript);
+  document.getElementById('ic-vig').textContent = ic.toFixed(4);
+  document.getElementById('veredicto-vig').textContent = renderVeredicto(ic);
+  renderBarras(cript, 'bars-vig', 'labels-vig');
+
+  const candidatos = kasiskiCandidatos(cript);
+  const conIC = candidatos.slice(0,8).map(c => ({...c, icProm: icPromedioColumnas(cript, c.L)}));
+  conIC.sort((x,y)=>y.icProm - x.icProm);
+
+  const cont = document.getElementById('candidatos-vig');
+  cont.innerHTML = '';
+  conIC.forEach((c,i)=>{
+    const div = document.createElement('div');
+    div.className = 'candidato' + (i===0 ? ' elegido' : '');
+    div.innerHTML = `<span class="b">L=${c.L}</span><span class="txt">votos Kasiski: ${c.votos} · IC promedio columnas: ${c.icProm.toFixed(4)}</span>`;
+    div.onclick = () => seleccionarVigenere(c.L, cript);
+    cont.appendChild(div);
+  });
+  if (conIC.length) seleccionarVigenere(conIC[0].L, cript);
+  document.getElementById('res-vig').classList.add('visible');
+}
+function seleccionarVigenere(L, cript){
+  const clave = romperVigenere(cript, L);
+  document.getElementById('long-vig').textContent = L;
+  document.getElementById('clave-vig').textContent = clave;
+  document.getElementById('salida-vig').textContent = descifrarVigenere(cript, clave);
+  document.querySelectorAll('#candidatos-vig .candidato').forEach(el=>el.classList.remove('elegido'));
+}
+</script>
+</body>
+</html>

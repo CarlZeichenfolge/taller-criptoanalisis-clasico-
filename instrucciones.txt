@@ -1,0 +1,45 @@
+TALLER DE CIFRADO CLÁSICO  2026-II
+Seguridad de la Información  Universidad El Bosque
+Estudiante: Carlos Alejandro Cadena Orjuela
+
+
+1. LENGUAJE UTILIZADO
+
+HTML5 + CSS3 + JavaScript (vanilla, sin frameworks ni librerías externas).
+
+Todo el proyecto está contenido en un único archivo: taller-cifrado.html
+No requiere Node.js, Python, ni ningún entorno de ejecución especial:
+el navegador interpreta y ejecuta todo directamente.
+
+2. INSTRUCCIONES DE DESPLIEGUE
+
+Al ser un archivo HTML estático (no Python ni otro lenguaje que requiera
+un intérprete o entorno especial), el despliegue es simple:
+
+Opción A - Ver localmente:
+  1. Abrir el archivo taller-cifrado.html directamente con cualquier
+     navegador (doble clic, o clic derecho > Abrir con > navegador).
+
+Opción B - Desplegar en un servidor (como se hizo para la entrega):
+  1. Instalar un servidor web en la VPS/instancia (usado: Nginx sobre
+     Ubuntu Server en una instancia EC2 de AWS).
+       sudo apt update && sudo apt install nginx -y
+  2. Copiar el archivo taller-cifrado.html al servidor (vía scp) y
+     renombrarlo/moverlo a la ruta que sirve Nginx por defecto:
+       sudo cp taller-cifrado.html /var/www/html/index.html
+  3. Abrir el puerto 80 en el firewall/Security Group de la instancia
+     (sin certificado SSL, según lo solicitado en la guía del taller).
+  4. Apuntar el registro DNS tipo A del dominio propio hacia la IP
+     pública (elástica/fija) de la instancia.
+
+El sitio queda accesible en: http://www.carloscadena.xyz
+
+3. CÓDIGO DE LA PÁGINA
+Ver archivo adjunto: taller-cifrado.html
+
+Contiene:
+  - Cálculo del Índice de Coincidencia (IC)
+  - Conteo de frecuencias de letras
+  - Ataque de fuerza bruta para Cifrado César
+  - Ataque por búsqueda de (a,b) para Cifrado Afín (validando mcd(a,27)=1)
+  - Ataque de Kasiski + análisis chi-cuadrado para Cifrado de Vigenère
